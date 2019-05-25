@@ -4,6 +4,7 @@ package restapi
 
 import (
 	"crypto/tls"
+	"log"
 	"net/http"
 
 	errors "github.com/go-openapi/errors"
@@ -11,6 +12,7 @@ import (
 	middleware "github.com/go-openapi/runtime/middleware"
 
 	"github.com/xbcsmith/spoon/restapi/operations"
+	"github.com/xbcsmith/spoon/restapi/operations/healthz"
 	"github.com/xbcsmith/spoon/restapi/operations/spoons"
 
 	handlers "github.com/xbcsmith/spoon/handlers"
@@ -31,7 +33,7 @@ func configureAPI(api *operations.SpoonAPI) http.Handler {
 	// Expected interface func(string, ...interface{})
 	//
 	// Example:
-	// api.Logger = log.Printf
+	api.Logger = log.Printf
 
 	api.JSONConsumer = runtime.JSONConsumer()
 
@@ -65,6 +67,16 @@ func configureAPI(api *operations.SpoonAPI) http.Handler {
 	if api.SpoonsFindSpoonsHandler == nil {
 		api.SpoonsFindSpoonsHandler = spoons.FindSpoonsHandlerFunc(func(params spoons.FindSpoonsParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation spoons.FindSpoons has not yet been implemented")
+		})
+	}
+	if api.HealthzGetLivenessHandler == nil {
+		api.HealthzGetLivenessHandler = healthz.GetLivenessHandlerFunc(func(params healthz.GetLivenessParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation healthz.GetLiveness has not yet been implemented")
+		})
+	}
+	if api.HealthzGetReadinessHandler == nil {
+		api.HealthzGetReadinessHandler = healthz.GetReadinessHandlerFunc(func(params healthz.GetReadinessParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation healthz.GetReadiness has not yet been implemented")
 		})
 	}
 	if api.SpoonsGetSpoonHandler == nil {

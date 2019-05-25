@@ -19,6 +19,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/xbcsmith/spoon/restapi/operations/healthz"
 	"github.com/xbcsmith/spoon/restapi/operations/spoons"
 
 	handlers "github.com/xbcsmith/spoon/handlers"
@@ -47,14 +48,12 @@ func NewSpoonAPI(spec *loads.Document) *SpoonAPI {
 				return spoons.NewAddSpoonDefault(500).WithPayload(&models.Error{Code: 500, Message: swag.String(err.Error())})
 			}
 			return spoons.NewAddSpoonCreated().WithPayload(params.Body)
-
 		}),
 		SpoonsDestroySpoonHandler: spoons.DestroySpoonHandlerFunc(func(params spoons.DestroySpoonParams, principal *models.Principal) middleware.Responder {
 			if err := handlers.DeleteItem(params.ID); err != nil {
 				return spoons.NewDestroySpoonDefault(500).WithPayload(&models.Error{Code: 500, Message: swag.String(err.Error())})
 			}
 			return spoons.NewDestroySpoonNoContent()
-
 		}),
 		SpoonsFindSpoonsHandler: spoons.FindSpoonsHandlerFunc(func(params spoons.FindSpoonsParams, principal *models.Principal) middleware.Responder {
 			mergedParams := spoons.NewFindSpoonsParams()
@@ -66,7 +65,6 @@ func NewSpoonAPI(spec *loads.Document) *SpoonAPI {
 				mergedParams.Limit = params.Limit
 			}
 			return spoons.NewFindSpoonsOK().WithPayload(handlers.AllItems(*mergedParams.Since, *mergedParams.Limit))
-
 		}),
 		SpoonsGetSpoonHandler: spoons.GetSpoonHandlerFunc(func(params spoons.GetSpoonParams, principal *models.Principal) middleware.Responder {
 			item, err := handlers.GetItem(params.ID)
@@ -74,15 +72,27 @@ func NewSpoonAPI(spec *loads.Document) *SpoonAPI {
 				return spoons.NewGetSpoonDefault(500).WithPayload(&models.Error{Code: 500, Message: swag.String(err.Error())})
 			}
 			return spoons.NewGetSpoonOK().WithPayload(item)
-
 		}),
 		SpoonsUpdateSpoonHandler: spoons.UpdateSpoonHandlerFunc(func(params spoons.UpdateSpoonParams, principal *models.Principal) middleware.Responder {
-
 			if err := handlers.UpdateItem(params.ID, params.Body); err != nil {
 				return spoons.NewUpdateSpoonDefault(500).WithPayload(&models.Error{Code: 500, Message: swag.String(err.Error())})
 			}
 			return spoons.NewUpdateSpoonOK().WithPayload(params.Body)
-
+		}),
+		// Healthz
+		HealthzGetLivenessHandler: healthz.GetLivenessHandlerFunc(func(params healthz.GetLivenessParams, principal *models.Principal) middleware.Responder {
+			live, err := handlers.LivenessCheck()
+			if err != nil {
+				return healthz.NewGetLivenessDefault(500).WithPayload(&models.Error{Code: 500, Message: swag.String(err.Error())})
+			}
+			return healthz.NewGetLivenessOK().WithPayload(live)
+		}),
+		HealthzGetReadinessHandler: healthz.GetReadinessHandlerFunc(func(params healthz.GetReadinessParams, principal *models.Principal) middleware.Responder {
+			ready, err := handlers.ReadinessCheck()
+			if err != nil {
+				return healthz.NewGetReadinessDefault(500).WithPayload(&models.Error{Code: 500, Message: swag.String(err.Error())})
+			}
+			return healthz.NewGetReadinessOK().WithPayload(ready)
 		}),
 
 		// Applies when the "x-spoon-token" header is set
@@ -92,6 +102,7 @@ func NewSpoonAPI(spec *loads.Document) *SpoonAPI {
 				return nil, errors.New(401, "incorrect api key auth")
 			}
 			return principal, nil
+
 		},
 
 		// default authorizer is authorized meaning no requests are blocked
@@ -140,6 +151,10 @@ type SpoonAPI struct {
 	SpoonsDestroySpoonHandler spoons.DestroySpoonHandler
 	// SpoonsFindSpoonsHandler sets the operation handler for the find spoons operation
 	SpoonsFindSpoonsHandler spoons.FindSpoonsHandler
+	// HealthzGetLivenessHandler sets the operation handler for the get liveness operation
+	HealthzGetLivenessHandler healthz.GetLivenessHandler
+	// HealthzGetReadinessHandler sets the operation handler for the get readiness operation
+	HealthzGetReadinessHandler healthz.GetReadinessHandler
 	// SpoonsGetSpoonHandler sets the operation handler for the get spoon operation
 	SpoonsGetSpoonHandler spoons.GetSpoonHandler
 	// SpoonsUpdateSpoonHandler sets the operation handler for the update spoon operation
@@ -221,6 +236,14 @@ func (o *SpoonAPI) Validate() error {
 
 	if o.SpoonsFindSpoonsHandler == nil {
 		unregistered = append(unregistered, "spoons.FindSpoonsHandler")
+	}
+
+	if o.HealthzGetLivenessHandler == nil {
+		unregistered = append(unregistered, "healthz.GetLivenessHandler")
+	}
+
+	if o.HealthzGetReadinessHandler == nil {
+		unregistered = append(unregistered, "healthz.GetReadinessHandler")
 	}
 
 	if o.SpoonsGetSpoonHandler == nil {
@@ -355,6 +378,16 @@ func (o *SpoonAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/spoons"] = spoons.NewFindSpoons(o.context, o.SpoonsFindSpoonsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/healthz/liveness"] = healthz.NewGetLiveness(o.context, o.HealthzGetLivenessHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/healthz/readiness"] = healthz.NewGetReadiness(o.context, o.HealthzGetReadinessHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

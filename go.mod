@@ -3,6 +3,7 @@ module github.com/xbcsmith/spoon
 go 1.12
 
 require (
+	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/go-openapi/errors v0.19.0
 	github.com/go-openapi/loads v0.19.0
 	github.com/go-openapi/runtime v0.19.0

@@ -58,11 +58,22 @@ Certs
 
 ## Test
 
+```
+export SPOON_TOKEN="$(echo spoons | sha256sum | awk '{print $1}')
+```
 
 ```
 spoon-server --port 30570 --tls-certificate server.rsa.crt --tls-key server.rsa.key
 ```
 
 ```
-curl -k -i -H 'Content-Type: application/com.github.xbcsmith.spoon.v1+json' -H 'X-Spoon-Token: 12345' http://127.0.0.1:30570/api/v1/spoons
+curl -k -i -H 'Content-Type: application/com.github.xbcsmith.spoon.v1+json' -H "X-Spoon-Token: $SPOON_TOKEN" http://127.0.0.1:30570/api/v1/spoons
+```
+
+```
+curl -i -H 'Content-Type: application/com.github.xbcsmith.spoon.v1+json' -H "X-Spoon-Token: $SPOON_TOKEN" http://127.0.0.1:30570/api/v1/spoons -d "{\"description\":\"message $RANDOM\"}"
+```
+
+```
+curl -i -H 'Content-Type: application/com.github.xbcsmith.spoon.v1+json' -H 'X-Spoon-Token: 12345' http://127.0.0.1:30570/api/v1/spoons/1
 ```

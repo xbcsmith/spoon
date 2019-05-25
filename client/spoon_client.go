@@ -11,6 +11,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/xbcsmith/spoon/client/healthz"
 	"github.com/xbcsmith/spoon/client/spoons"
 )
 
@@ -56,6 +57,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Spoon {
 
 	cli := new(Spoon)
 	cli.Transport = transport
+
+	cli.Healthz = healthz.New(transport, formats)
 
 	cli.Spoons = spoons.New(transport, formats)
 
@@ -103,6 +106,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Spoon is a client for spoon
 type Spoon struct {
+	Healthz *healthz.Client
+
 	Spoons *spoons.Client
 
 	Transport runtime.ClientTransport
@@ -111,6 +116,8 @@ type Spoon struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *Spoon) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+
+	c.Healthz.SetTransport(transport)
 
 	c.Spoons.SetTransport(transport)
 

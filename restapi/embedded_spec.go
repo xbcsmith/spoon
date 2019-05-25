@@ -36,6 +36,74 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/healthz/liveness": {
+      "get": {
+        "tags": [
+          "healthz"
+        ],
+        "operationId": "get_liveness",
+        "responses": {
+          "200": {
+            "description": "return the liveness of app",
+            "schema": {
+              "$ref": "#/definitions/liveness"
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "resource not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "generic error response",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/healthz/readiness": {
+      "get": {
+        "tags": [
+          "healthz"
+        ],
+        "operationId": "get_readiness",
+        "responses": {
+          "200": {
+            "description": "return the readiness of app",
+            "schema": {
+              "$ref": "#/definitions/readiness"
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "resource not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "generic error response",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/v1/spoons": {
       "get": {
         "tags": [
@@ -288,8 +356,30 @@ func init() {
         }
       }
     },
+    "liveness": {
+      "type": "object",
+      "required": [
+        "live"
+      ],
+      "properties": {
+        "live": {
+          "type": "boolean"
+        }
+      }
+    },
     "principal": {
       "type": "string"
+    },
+    "readiness": {
+      "type": "object",
+      "required": [
+        "ready"
+      ],
+      "properties": {
+        "ready": {
+          "type": "boolean"
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -324,6 +414,74 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/healthz/liveness": {
+      "get": {
+        "tags": [
+          "healthz"
+        ],
+        "operationId": "get_liveness",
+        "responses": {
+          "200": {
+            "description": "return the liveness of app",
+            "schema": {
+              "$ref": "#/definitions/liveness"
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "resource not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "generic error response",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/healthz/readiness": {
+      "get": {
+        "tags": [
+          "healthz"
+        ],
+        "operationId": "get_readiness",
+        "responses": {
+          "200": {
+            "description": "return the readiness of app",
+            "schema": {
+              "$ref": "#/definitions/readiness"
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "resource not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "generic error response",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/v1/spoons": {
       "get": {
         "tags": [
@@ -576,8 +734,30 @@ func init() {
         }
       }
     },
+    "liveness": {
+      "type": "object",
+      "required": [
+        "live"
+      ],
+      "properties": {
+        "live": {
+          "type": "boolean"
+        }
+      }
+    },
     "principal": {
       "type": "string"
+    },
+    "readiness": {
+      "type": "object",
+      "required": [
+        "ready"
+      ],
+      "properties": {
+        "ready": {
+          "type": "boolean"
+        }
+      }
     }
   },
   "securityDefinitions": {
