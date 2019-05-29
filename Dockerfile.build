@@ -1,0 +1,44 @@
+ARG GO_VERSION=1.12.1
+FROM golang:${GO_VERSION} as builder
+
+WORKDIR /build
+
+ENV GO111MODULE=on
+ARG GOPROXY
+COPY go.mod go.sum ./
+RUN go mod download
+
+
+COPY . .
+
+RUN set -eux; \
+    make linux
+
+FROM ubuntu:latest
+
+ENV BAR_PORT 30570
+ENV BAR_TOKEN 1234567890
+
+COPY --from=builder /build/bin/bar-server /usr/local/bin/bar-server
+COPY --from=builder /build/server.rsa.key /usr/local/bin/server.rsa.key
+COPY --from=builder /build/server.rsa.crt /usr/local/bin/server.rsa.crt
+COPY --from=builder /build/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN set -x && \
+    chmod 755 /usr/local/bin/entrypoint.sh && \
+    chmod 644 /usr/local/bin/server.rsa.key && \
+    chmod 644 /usr/local/bin/server.rsa.crt && \
+    chmod 755 /usr/local/bin/bar-server
+
+RUN set -x \
+ && groupadd  bar -g 9999 \
+ && useradd  -g bar -u 9999 -m -d /home/bar -s /bin/sh bar
+
+VOLUME /srv
+
+EXPOSE 30570
+
+USER bar
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+

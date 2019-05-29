@@ -18,3 +18,4 @@
 
 # Ignore temp dir
 ./temp
+.DS_Store

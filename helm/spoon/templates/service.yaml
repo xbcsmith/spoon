@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spoon.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "spoon.name" . }}
+    helm.sh/chart: {{ include "spoon.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "spoon.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

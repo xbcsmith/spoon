@@ -118,7 +118,7 @@ type SpoonDbCfg struct {
 	Name   string `env:"SPOON_DATABASE_NAME" envDefault:"spoons"`
 }
 
-// GetCfg get the cfg from os.Environ
+// GetDbCfg get the cfg from os.Environ
 func GetDbCfg() (*SpoonDbCfg, error) {
 	cfg := SpoonDbCfg{}
 	err := env.Parse(&cfg)
@@ -130,9 +130,9 @@ func GetDbCfg() (*SpoonDbCfg, error) {
 
 // SpoonCfg Cfg for app
 type SpoonCfg struct {
-	Url   string `env:"SPOON_URL" envDefault:"0.0.0.0"`
-	Token string `env:"SPOON_TOKEN" envDefault:"1234567890"`
+	Host  string `env:"SPOON_URL" envDefault:"0.0.0.0"`
 	Port  string `env:"SPOON_PORT" envDefault:"30570"`
+	Token string `env:"SPOON_TOKEN" envDefault:"1234567890"`
 	State string `env:"SPOON_STATE" envDefault:"stateless"`
 }
 
@@ -146,6 +146,7 @@ func GetCfg() (*SpoonCfg, error) {
 	return &cfg, nil
 }
 
+// TokenAuth gets token from Cfg
 func TokenAuth(token string) (*models.Principal, error) {
 	cfg, err := GetCfg()
 	if err == nil {
